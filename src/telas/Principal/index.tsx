@@ -1,62 +1,91 @@
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
-import { ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  Image
+} from "react-native";
 
-import { Participante } from "../../componente/Participante";
+import { Tarefa } from "../../componente/Tarefa";
 import { styles } from "./style";
 
+
 export default function Principal() {
+  const [tarefas, setTarefas] = useState<Tarefa[]>([]);
+  const [tarefa, setTarefa] = useState("");
 
-  const [participantes, setParticipantes] = useState(['Bruna'])
-
-  let inputText = ""
-
-  function adicionarParticipante() {
-
-    setParticipantes(prevState => [...prevState, inputText]);
-
-    console.log(inputText)
-
-    console.log(participantes);
-
+  function adicionarTarefa() {
+    if (tarefas.some((t) => t.name === tarefa.trim())) {
+      return console.log(tarefa, "- encontrado");
+    } else if (!tarefa.trim()) {
+      return console.log("encontrado vazio ou null");
+    } else {
+      setTarefas((prevState) => [
+        ...prevState,
+        { id: Date.now(), name: tarefa.trim(), completed: false },
+      ]);
+      setTarefa("");
+    }
   }
 
-  function removerParticipante() {
-    console.log("Func remover Participante");
+  function removerTarefa(id: number) {
+    setTarefas((prevState) => prevState.filter((tarefa) => tarefa.id !== id));
   }
+
+  function marcar(id: number) {
+    setTarefas((prevState) =>
+      prevState.map((tarefa) =>
+        tarefa.id === id ? { ...tarefa, completed: !tarefa.completed } : tarefa
+      )
+    );
+  }
+
+  const totalTarefas = tarefas.length;
+  const totalTarefasConcluidas = tarefas.filter((t) => t.completed).length;
+  const TarefasNaoConcluidas = totalTarefas - totalTarefasConcluidas;
 
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
-      <Text style={styles.textEvento}>Nome do Evento</Text>
-      <Text style={styles.textData}> 02 de Março de 2023 </Text>
+      <View style={styles.ImageContainer}>
+      <Image style={styles.image} source={require('../../../assets/todo.png')} />
+      </View>
+      <Text style={styles.textTitulo}>Lista de Tarefas</Text>
+    
 
       <View style={styles.form}>
         <TextInput
-          style={styles.textInputParticipant}
-          placeholder="Nome do participante"
+          style={styles.textInputTarefa}
+          placeholder="Adicione a tarefa"
           placeholderTextColor="#6b6b6b"
-          onChangeText={(text) => inputText = text}
+          onChangeText={setTarefa}
+          value={tarefa}
         />
-        <TouchableOpacity style={styles.botao} onPress={adicionarParticipante}>
+        <TouchableOpacity style={styles.botao} onPress={adicionarTarefa}>
           <Text style={styles.botaoTexto}>+</Text>
         </TouchableOpacity>
       </View>
+      <Text style={styles.textTarefa}>
+        Tarefas: {totalTarefas} </Text>
+        <Text style={styles.textTarefaConcluida}>
+        Concluídas: {totalTarefasConcluidas}{" "} </Text>
+        <Text style={styles.textTarefaNaoConcluida}>
+        Não Concluídas: {TarefasNaoConcluidas} </Text>
 
-      <Text style={styles.textParticipante} >Participantes</Text>
-
-      <ScrollView showsVerticalScrollIndicator={false} >
-        {
-          participantes.map((participante, index) => (
-            <Participante
-              key={index}
-              nome={participante}
-              btnRemover={() => removerParticipante()} />
-          ))
-        }
+      <ScrollView showsVerticalScrollIndicator={true}>
+        {tarefas.map((tarefa) => (
+          <Tarefa
+            key={tarefa.id}
+            nome={tarefa.name}
+            concluida={tarefa.completed}
+            btnRemover={() => removerTarefa(tarefa.id)}
+            btnConcluida={() => marcar(tarefa.id)}
+          />
+        ))}
       </ScrollView>
-
-
     </View>
   );
 }
