@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import {
-  StyleSheet,
+  
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import { styles } from "./style";
+import axios from "axios";
 interface Props {
   adicionarTarefa: (tarefa: string) => void;
 }
@@ -20,7 +21,7 @@ export function FormularioTarefa({ adicionarTarefa }: Props) {
       setTarefa("");
     }
   }
-
+  
   return (
     <View style={styles.container}>
       <TextInput
